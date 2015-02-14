@@ -1,0 +1,21 @@
+{
+  "author": "Pat Cappelaere <pat@cappelaere.com>",
+  "name": "geopix",
+  "description": "Simple synchronous node.js module which utilize libtiff/libgeotiff to get a pixel value from a geotiff, lat, lng.",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cappelaere/geopix.git"
+  },
+  "scripts": {
+    "install": "(node-gyp rebuild) || (exit 0)",
+    "preinstall": "(node-gyp configure) || (exit 0)",
+    "clean": "(node-gyp clean) || (exit 0)"
+  },
+  "main": "./lib/geopix.js",
+  "dependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": ">=0.12.0"
+  }
+}
