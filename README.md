@@ -13,7 +13,7 @@ npm install geopix
 ### Usage example:
 ```javascript
 var geopix 	= require('geopix');
-var tif			= geopix('landslide_nowcast_d02_20150213.tif')
-var value		= tif.latlng(15.12, -91.70)
+var tif			= geopix.GeoTIFFFile('landslide_nowcast_d02_20150213.tif')
+var value		= tif.LatLng(15.12, -91.70)
  
 ```
