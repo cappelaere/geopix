@@ -6,7 +6,7 @@
                 "src/geotiff.cc"
             ],
             "libraries": [
-                "-ltiff -lgeotiff"
+                "-ltiff"
             ]
         }
     ]
