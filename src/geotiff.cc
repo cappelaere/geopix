@@ -5,14 +5,14 @@
 #include "geotiff.hh"
 
 #include "geotiff.h"
-//#include "xtiffio.h"
+#include "xtiffio.h"
 //#include "geo_normalize.h"
 //#include "geo_simpletags.h"
 #include "geovalues.h"
 #include "tiffio.h"
 
-//#include "geo_tiffp.h" /* external TIFF interface */
-//#include "geo_keyp.h" /* private interface */
+#include "geo_tiffp.h" /* external TIFF interface */
+#include "geo_keyp.h" /* private interface */
 #include "geokeys.h"
 
 using namespace v8;
