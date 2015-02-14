@@ -115,7 +115,7 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
 	
   double *data;
 	int count;
-	double xmin, ymax, xres=0, yres=0;
+	double xmin=0, ymax=0, xres=0, yres=0;
 	int verbose = 0;
   
 	if ((gtif->gt_methods.get)(tif, GTIFF_TIEPOINTS, &count, &data)) {
@@ -178,7 +178,7 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
     imageOffset += result;
 	}
 
-  double pixel_value;
+  double pixel_value = -1.0;
 	if( bs == 16 ) {
 		uint16* ubuf  = (uint16*)buf;  
     pixel_value   = ubuf[pos];
