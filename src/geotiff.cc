@@ -190,7 +190,7 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
   } else if( bs == 8 ) {
     pixel_value   = buf[pos];
   } else {
-    printf"invalid bs %d\n", bs);
+    printf("invalid bs %d\n", bs);
   }
   
 	free(buf);
