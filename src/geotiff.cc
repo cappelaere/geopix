@@ -50,6 +50,8 @@ void GEOTIFFFile::New(const FunctionCallbackInfo<Value>& args) {
     if (args.IsConstructCall()) {
       // Invoked as constructor: `new MyObject(...)`
       
+      printf("geopix opening geotif %s...\n", *filename);
+      
       TIFF *tif = XTIFFOpen(*filename, "r");
       if (tif != NULL) {
       	GTIF* gtif = GTIFNew(tif);
@@ -113,6 +115,8 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
 	TIFFGetField(tif, TIFFTAG_DATATYPE, &dtype);
 	TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bs);
 	
+  printf(" lat: %f lng: %f xsize: %d ysize: %d dtype: %d bs: %d\n", lat, lng, xsize, ysize, dtype, bs);
+  
   double *data;
 	int count;
 	double xmin=0, ymax=0, xres=0, yres=0;
@@ -156,8 +160,9 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
 	// find position in buffer
 	long pos			= pixY*xsize + pixX;
 	if( pos < 0 || pos > xsize*ysize ) printf("Invalid pos %ld\n", pos);
+
+	printf("geopixel %ld %ld pos %ld\n", pixX, pixY, pos);
 	
-	//if( verbose ) printf("pixel %ld %ld pos %ld\n", pixX, pixY, pos);
 	
 	tstrip_t numstrips        = TIFFNumberOfStrips(tif);
 	tstrip_t stripsize        = TIFFStripSize(tif);
@@ -182,9 +187,10 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
 	if( bs == 16 ) {
 		uint16* ubuf  = (uint16*)buf;  
     pixel_value   = ubuf[pos];
-  }
-	if( bs == 8 ) {
+  } else if( bs == 8 ) {
     pixel_value   = buf[pos];
+  } else {
+    printf"invalid bs %d\n", bs);
   }
   
 	free(buf);
