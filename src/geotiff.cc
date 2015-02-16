@@ -70,7 +70,7 @@ void GEOTIFFFile::New(const FunctionCallbackInfo<Value>& args) {
         args.GetReturnValue().Set(cons->NewInstance(argc, argv));
       }
   } else {
-    printf("Invalid geopix init params %d\n", args.Length())
+    printf("Invalid geopix init params %d\n", args.Length());
     isolate->ThrowException(
         Exception::TypeError(String::NewFromUtf8(isolate,"Invalid params (String filename)")));
   }
@@ -85,7 +85,7 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
   GTIF* gtif = self->gtif;
   
   if (args.Length() < 2) {
-      printf("Invalid geopix LatLng params %d\n", args.Length())
+      printf("Invalid geopix LatLng params %d\n", args.Length());
       isolate->ThrowException(Exception::TypeError(
           String::NewFromUtf8(isolate, "Wrong number of arguments")));
       return;
