@@ -187,7 +187,7 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
     imageOffset += result;
 	}
 
-  double pixel_value = -2.0;
+  double pixel_value = - bs;
 	if( bs == 16 ) {
 		uint16* ubuf  = (uint16*)buf;  
     pixel_value   = ubuf[pos];
