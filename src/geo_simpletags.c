@@ -24,7 +24,8 @@
  *                    tags in memory, without depending on libtiff.
  *
  *****************************************************************************/
- 
+#include <string.h>
+
 #include "geotiff.h"    /* public GTIFF interface */
 #include "geo_simpletags.h"
 
