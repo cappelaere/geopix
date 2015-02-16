@@ -13,6 +13,8 @@
  *    7 July,  1995      Greg Martin             Fix index
  *
  **********************************************************************/
+#include <string.h> // memcpy
+#include <stdlib.h> //realloc
 
 #include "geotiffio.h"   /* public interface        */
 #include "geo_tiffp.h" /* external TIFF interface */
