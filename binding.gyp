@@ -7,7 +7,7 @@
                 "src/xtiff.c",
                 "src/geo_new.c",
 				"src/geo_tiffp.c",
-				"geo_simpletags.c"
+				"src/geo_simpletags.c"
             ],
             "libraries": [
                 "-ltiff"
