@@ -29,7 +29,7 @@ void GEOTIFFFile::New(const FunctionCallbackInfo<Value>& args) {
   Isolate *isolate = Isolate::GetCurrent();
   HandleScope scope(isolate);
 
-  TIFFFile *tifffile;
+  GEOTIFFFile *tifffile;
 
   if (args.Length() == 1 && args[0]->IsString()) {
     String::Utf8Value filename(args[0]);
