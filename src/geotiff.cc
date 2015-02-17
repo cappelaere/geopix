@@ -15,6 +15,8 @@ GEOTIFFFile::~GEOTIFFFile() { TIFFClose(tif); };
 void GEOTIFFFile::Init(Handle<Object> exports) {
   Isolate *isolate = Isolate::GetCurrent();
 
+  TIFFSetWarningHandler(NULL);
+  
   // Prepare constructor template
   Local<FunctionTemplate> tpl = FunctionTemplate::New(isolate, New);
   tpl->SetClassName(String::NewFromUtf8(isolate, "GEOTIFFFile"));
