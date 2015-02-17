@@ -1,29 +1,16 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "tiffio.h"
 #include "geotiff.hh"
-
-#include "geotiff.h"
-#include "xtiffio.h"
-//#include "geo_normalize.h"
-//#include "geo_simpletags.h"
-#include "geovalues.h"
-#include "tiffio.h"
-
-#include "geo_tiffp.h" /* external TIFF interface */
-#include "geo_keyp.h" /* private interface */
-#include "geokeys.h"
 
 using namespace v8;
 Persistent<Function> GEOTIFFFile::constructor;
 
-GEOTIFFFile::GEOTIFFFile(TIFF *tifHandle, GTIF* gtifHandle) { 
+GEOTIFFFile::GEOTIFFFile(TIFF *tifHandle) { 
   tif   = tifHandle; 
-  gtif  = gtifHandle;
 };
 
-GEOTIFFFile::~GEOTIFFFile() { XTIFFClose(tif); };
+GEOTIFFFile::~GEOTIFFFile() { TIFFClose(tif); };
 
 void GEOTIFFFile::Init(Handle<Object> exports) {
   Isolate *isolate = Isolate::GetCurrent();
@@ -42,7 +29,7 @@ void GEOTIFFFile::New(const FunctionCallbackInfo<Value>& args) {
   Isolate *isolate = Isolate::GetCurrent();
   HandleScope scope(isolate);
 
-  GEOTIFFFile *tifffile;
+  TIFFFile *tifffile;
 
   if (args.Length() == 1 && args[0]->IsString()) {
     String::Utf8Value filename(args[0]);
@@ -52,10 +39,10 @@ void GEOTIFFFile::New(const FunctionCallbackInfo<Value>& args) {
       
       printf("geopix opening geotif %s...\n", *filename);
       
-      TIFF *tif = XTIFFOpen(*filename, "r");
+      TIFF *tif = TIFFOpen(*filename, "r");
       if (tif != NULL) {
-      	GTIF* gtif = GTIFNew(tif);
-        tifffile = new GEOTIFFFile(tif, gtif);
+      
+        tifffile = new GEOTIFFFile(tif);
         tifffile->Wrap(args.This());
         args.GetReturnValue().Set(args.This());
       } else {
@@ -82,7 +69,6 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
 
   GEOTIFFFile *self = ObjectWrap::Unwrap<GEOTIFFFile>(args.This());
   TIFF *tif  = self->tif;
-  GTIF* gtif = self->gtif;
   
   if (args.Length() < 2) {
       printf("Invalid geopix LatLng params %d\n", args.Length());
@@ -113,7 +99,7 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
     return;
   }
   
-	int xsize, ysize, dtype, bs;
+	int xsize=0, ysize=0, dtype=0, bs=0;
 	TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &xsize);
 	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &ysize);
 	TIFFGetField(tif, TIFFTAG_DATATYPE, &dtype);
@@ -121,38 +107,37 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
 	
   printf(" lat: %f lng: %f xsize: %d ysize: %d dtype: %d bs: %d\n", lat, lng, xsize, ysize, dtype, bs);
   
+#define TIFFTAG_GEOPIXELSCALE       33550
+#define TIFFTAG_GEOTIEPOINTS        33922
+  
   double *data;
-	int count;
+	int count=0;
 	double xmin=0, ymax=0, xres=0, yres=0;
 	int verbose = 0;
   
-	if ((gtif->gt_methods.get)(tif, GTIFF_TIEPOINTS, &count, &data)) {
-		if( verbose ) {
-			printf("GTIFF_TIEPOINTS: ");
-			for (int i = 0; i < count; i++) {
-				printf("%-17.15g ", data[i]);
-			}
-			printf("\n");
-		}
-		xmin 	= data[3];	// min long
-		ymax	= data[4];	// max lat
-		
-		_GTIFFree(data);
-	}
-	
-	if ((gtif->gt_methods.get)(tif, GTIFF_PIXELSCALE, &count, &data )) {
-		if( verbose ) {
-			printf("GTIFF_PIXELSCALE: ");
-			for (int i = 0; i < count; i++) {
-				printf("%-17.15g ", data[i]);
-			}
-			printf("\n");
-		}	
-		
-		xres 	= data[0];
-		yres 	= data[1];
-		_GTIFFree(data);
-	}
+  if (TIFFGetField(tif, TIFFTAG_GEOTIEPOINTS, &count, &data)) {
+  	if( verbose ) {
+  		printf("TIFFTAG_GEOTIEPOINTS: ");
+  		for (int i = 0; i < count; i++) {
+  			printf("%-17.15g ", data[i]);
+  		}
+  		printf("\n");
+  	}
+  	xmin 	= data[3];	// min long
+  	ymax	= data[4];	// max lat
+  }
+
+  if (TIFFGetField(tif, TIFFTAG_GEOPIXELSCALE, &count, &data)) {
+  	if( verbose ) {
+  		printf("TIFFTAG_PIXELSCALE: ");
+  		for (int i = 0; i < count; i++) {
+  			printf("%-17.15g ", data[i]);
+  		}
+  		printf("\n");
+  	}
+  	xres 	= data[0];
+  	yres 	= data[1];
+  }
   
 	// find pixel of interest
 	long pixX			= lround((lng - xmin) / xres);
@@ -166,7 +151,6 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
 	if( pos < 0 || pos > xsize*ysize ) printf("Invalid pos %ld\n", pos);
 
 	printf("geopixel %ld %ld pos %ld\n", pixX, pixY, pos);
-	
 	
 	tstrip_t numstrips        = TIFFNumberOfStrips(tif);
 	tstrip_t stripsize        = TIFFStripSize(tif);
