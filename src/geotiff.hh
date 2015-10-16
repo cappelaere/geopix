@@ -4,7 +4,7 @@
 #include <node.h>
 #include <node_object_wrap.h>
 
-#include "tiffio.h"
+#include <tiffio.h>
 
 	class GEOTIFFFile : public node::ObjectWrap {
 	public:

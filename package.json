@@ -2,7 +2,7 @@
   "author": "Pat Cappelaere <pat@cappelaere.com>",
   "name": "geopix",
   "description": "Simple synchronous node.js module which utilize libtiff/libgeotiff to get a pixel value from a geotiff, lat, lng.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "git://github.com/cappelaere/geopix.git"

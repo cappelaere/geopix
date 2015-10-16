@@ -3,6 +3,8 @@
 
 #include "geotiff.hh"
 
+int verbose = 1;
+
 using namespace v8;
 Persistent<Function> GEOTIFFFile::constructor;
 
@@ -16,7 +18,7 @@ void GEOTIFFFile::Init(Handle<Object> exports) {
   Isolate *isolate = Isolate::GetCurrent();
 
   TIFFSetWarningHandler(NULL);
-  
+
   // Prepare constructor template
   Local<FunctionTemplate> tpl = FunctionTemplate::New(isolate, New);
   tpl->SetClassName(String::NewFromUtf8(isolate, "GEOTIFFFile"));
@@ -39,7 +41,7 @@ void GEOTIFFFile::New(const FunctionCallbackInfo<Value>& args) {
     if (args.IsConstructCall()) {
       // Invoked as constructor: `new MyObject(...)`
       
-      printf("geopix opening geotif %s...\n", *filename);
+      if(verbose) printf("geopix opening geotif %s...\n", *filename);
       
       TIFF *tif = TIFFOpen(*filename, "r");
       if (tif != NULL) {
@@ -107,7 +109,7 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
 	TIFFGetField(tif, TIFFTAG_DATATYPE, &dtype);
 	TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bs);
 	
-  printf(" lat: %f lng: %f xsize: %d ysize: %d dtype: %d bs: %d\n", lat, lng, xsize, ysize, dtype, bs);
+  if(verbose) printf("lat: %f lng: %f xsize: %d ysize: %d dtype: %d bs: %d\n", lat, lng, xsize, ysize, dtype, bs);
   
 #define TIFFTAG_GEOPIXELSCALE       33550
 #define TIFFTAG_GEOTIEPOINTS        33922
@@ -115,28 +117,27 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
   double *data;
 	int count=0;
 	double xmin=0, ymax=0, xres=0, yres=0;
-	int verbose = 0;
   
   if (TIFFGetField(tif, TIFFTAG_GEOTIEPOINTS, &count, &data)) {
-  	if( verbose ) {
-  		printf("TIFFTAG_GEOTIEPOINTS: ");
-  		for (int i = 0; i < count; i++) {
-  			printf("%-17.15g ", data[i]);
-  		}
-  		printf("\n");
-  	}
+  	//if( verbose ) {
+  	//	printf("TIFFTAG_GEOTIEPOINTS: ");
+  	//	for (int i = 0; i < count; i++) {
+  	//		printf("%-17.15g ", data[i]);
+  	//	}
+  	//	printf("\n");
+  	//}
   	xmin 	= data[3];	// min long
   	ymax	= data[4];	// max lat
   }
 
   if (TIFFGetField(tif, TIFFTAG_GEOPIXELSCALE, &count, &data)) {
-  	if( verbose ) {
-  		printf("TIFFTAG_PIXELSCALE: ");
-  		for (int i = 0; i < count; i++) {
-  			printf("%-17.15g ", data[i]);
-  		}
-  		printf("\n");
-  	}
+  	//if( verbose ) {
+  	//	printf("TIFFTAG_PIXELSCALE: ");
+  	//	for (int i = 0; i < count; i++) {
+  	//		printf("%-17.15g ", data[i]);
+  	//	}
+  	//	printf("\n");
+  	//}
   	xres 	= data[0];
   	yres 	= data[1];
   }
@@ -152,7 +153,6 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
 	long pos			= pixY*xsize + pixX;
 	if( pos < 0 || pos > xsize*ysize ) printf("Invalid pos %ld\n", pos);
 
-	printf("geopixel %ld %ld pos %ld\n", pixX, pixY, pos);
 	
 	tstrip_t numstrips        = TIFFNumberOfStrips(tif);
 	tstrip_t stripsize        = TIFFStripSize(tif);
@@ -168,7 +168,7 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
     if((result = TIFFReadEncodedStrip (tif, strip,buf + imageOffset,stripsize)) == -1){
          fprintf(stderr, "Read error on input strip number %d\n", strip);
          isolate->ThrowException(Exception::TypeError( String::NewFromUtf8(isolate, "Read error on input strip")));
-        return;
+         return;
     }
     imageOffset += result;
 	}
@@ -178,11 +178,14 @@ void GEOTIFFFile::LatLng(const FunctionCallbackInfo<v8::Value>& args) {
 		uint16* ubuf  = (uint16*)buf;  
     pixel_value   = ubuf[pos];
   } else if( bs == 8 ) {
-    pixel_value   = buf[pos];
+		uint8* ubuf   = (uint8*)buf;
+    pixel_value   = ubuf[pos];
   } else {
     printf("invalid bs %d\n", bs);
   }
-  
+	
+	if( verbose) printf("geopixel x: %ld y: %ld pos: %ld val: %lf\n", pixX+1, pixY+1, pos, pixel_value);
+
 	free(buf);
 
   Local<Number> val = Number::New(isolate, pixel_value);
